@@ -12,6 +12,12 @@ binaries, source code, firmware, or Linux patches.
   source, complete project patch and build config are supplied alongside the
   binaries. See `licenses/Linux-COPYING` and source file headers.
 - **BusyBox1.36.1**: GPL-2.0, full source/config supplied; `licenses/BusyBox-LICENSE`.
+- **GNU C Library2.43**: bootstrap helpers/BusyBox are statically linked against
+  Ubuntu2.43-2ubuntu2cross1. LGPL-2.1-or-later and component-specific notices;
+  see `licenses/glibc-COPYRIGHT` and `licenses/LGPL-2.1`. Full upstream source
+  and Ubuntu2.43-2ubuntu2 packaging patches are in the source archive. Helper
+  sources and static relink/build commands are supplied so they can be rebuilt
+  against a replacement C library.
 - **U-Boot2024.10**: GPL-2.0 and component-specific notices. Full source, MuntsOS
   recipe/patch/config supplied; `licenses/U-Boot-LICENSE`. Our binary adjustment
   changes the watchdog DTB property, not executable code.

@@ -32,6 +32,19 @@
     "u-boot-upstream.tar.gz": {
       "bytes": 35055599,
       "sha256": "6c99df5f9402d05b5a5cfc60f941f0a584d0d9355fce46261bef008487a0f6c4"
+    },
+    "glibc-upstream.tar.xz": {
+      "bytes": 20297012,
+      "sha256": "d9c86c6b5dbddb43a3e08270c5844fc5177d19442cf5b8df4be7c07cd5fa3831"
+    },
+    "glibc-ubuntu-patches.tar.xz": {
+      "bytes": 510092,
+      "sha256": "d83cbf8517c594182bea1b2544522d9b99b537427ea64a4df56b10505fa45e45"
     }
+  },
+  "static_c_library": {
+    "version": "glibc2.43-2ubuntu2cross1",
+    "source": "https://ftp.gnu.org/gnu/glibc/glibc-2.43.tar.xz",
+    "patches": "https://archive.ubuntu.com/ubuntu/pool/main/g/glibc/glibc_2.43-2ubuntu2.debian.tar.xz"
   }
 }
