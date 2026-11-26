@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "sha256": "c32d630a3e85eb3612fd827854edd9cbddbe0c50766df6d77dd8f4cda8c24c86",
+    "matches_new_empty_filesystem": true
+  },
+  "userdata": {
+    "sha256": "b468982da2b1074fdc30123195a083dbb4d8dee23cb754f286f33b27e5dc491c",
+    "matches_new_empty_filesystem": true
+  },
+  "media_data": {
+    "sha256": "7b7bdbaa37c85bab0ccb23233480e36f64222d76451543e05bc4e4ec9ce24d6e",
+    "matches_new_empty_filesystem": true
+  },
+  "f2fs_checkpoint": {
+    "status": "latest F2FS checkpoint clean; both CRCs and footers verified",
+    "block_bytes": 4096,
+    "packs": [
+      {
+        "pack": 0,
+        "version": 1681371655,
+        "flags": "0x185",
+        "crc_verified": true,
+        "matching_footer": true,
+        "clean_unmount": true
+      },
+      {
+        "pack": 1,
+        "version": 0,
+        "flags": "0x185",
+        "crc_verified": true,
+        "matching_footer": true,
+        "clean_unmount": true
+      }
+    ],
+    "latest_pack": 0
+  },
+  "hardware_boot_of_fresh_image": "pending",
+  "personal_userdata_copied": false
+}

@@ -1,0 +1,11 @@
+setenv bootargs console=null mem=1024M rdinit=/opi-init panic=0 clk_ignore_unused cpuidle.off=1 nbd.nbds_max=1 nbd.max_part=32 nbd.boot_platform=1 zram.num_devices=1 g_ether.idVendor=0x1f3a g_ether.idProduct=0xefea g_ether.iProduct=OrangePi-Android-USB g_ether.dev_addr=02:1f:3a:00:00:02 g_ether.host_addr=02:1f:3a:00:00:01 androidboot.hardware=sun50iw9p1 androidboot.slot_suffix=_a androidboot.boot_devices=opi-usb-boot androidboot.force_normal_boot=1 androidboot.dynamic_partitions=true androidboot.dynamic_partitions_retrofit=true androidboot.selinux=permissive androidboot.verifiedbootstate=orange androidboot.vbmeta.device_state=unlocked androidboot.flash.locked=0 androidboot.serialno=OPiZero2WUSB androidboot.opi_usb_boot=1 firmware_class.path=/vendor/etc/firmware buildvariant=userdebug nokaslr opi_diag opi_recovery opi_live_kmsg=1
+setenv initrd_high 0xffffffffffffffff
+setenv fdt_high 0xffffffffffffffff
+mw.l 0x4f900004 1
+mw.l 0x030090b4 0x16aa0001
+mw.l 0x030090b8 0x16aa00b1
+mw.l 0x030090b0 0x000014af
+fdt addr 0x4f800000
+fdt resize 65536
+mw.l 0x4f900004 3
+booti 0x40080000 0x4ff00000:0x15ba727 0x4f800000

@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+/backups/
+/data/
+/logs/
+/build/
+/prepared/
+/sources/
+/tools/clang12/
+/tools/native/
+/tools/sunxi-tools-source/sunxi-fel

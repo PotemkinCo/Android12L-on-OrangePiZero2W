@@ -1,0 +1,37 @@
+{
+  "android": {
+    "upstream": "https://github.com/YAJATapps/android_device_allwinner_apollo-p2/releases/download/v3/omni-12.1_20241209_arm64_zero2w.zip",
+    "sha256": "330dabaf7332a2a5517d073834584eb70dd67552e5469ebfef81cf6dc8abf17e",
+    "release": "OmniROM12.1v3 ARM64 tablet"
+  },
+  "kernel": {
+    "upstream": "https://github.com/orangepi-xunlong/linux-orangepi",
+    "commit": "3a4a29414d558664847202f4d8919b8ab8bcf4a8",
+    "image_sha256": "7ac07d46fc06dd992e732c05d6da9ba2f7300c801dcad1b307eb81f90fdd3e57",
+    "config": "src/kernel-usbnet.config",
+    "patch": "src/kernel.patch"
+  },
+  "compiler": "Android Clang r416183b1/12.0.7",
+  "sunxi_tools_commit": "0237931bb3d66de17c441a3c94d0e4b39e1308d1",
+  "bootloader": {
+    "upstream_recipe": "https://github.com/pmunts/muntsos/tree/899dcd98c001ec6278fb6fb35454340e46ce1ce6/boot/OrangePiZero2W/uboot",
+    "u_boot_tag": "v2024.10",
+    "executable_images_modified": false,
+    "dtb_change": "disable watchdog driver so software recovery controls watchdog directly",
+    "tf_a_revision": "Upstream prebuilt recipe does not pin TF-A; byte-for-byte bootloader rebuild not claimed"
+  },
+  "source_archives": {
+    "linux-upstream.tar.gz": {
+      "bytes": 191547077,
+      "sha256": "9258b4007c8329758a5da8af66b77ab09a87a39075a6eb4f283105e91a5dfa2d"
+    },
+    "busybox-upstream.tar.bz2": {
+      "bytes": 2525473,
+      "sha256": "b8cc24c9574d809e7279c3be349795c5d5ceb6fdf19ca709f80cde50e47de314"
+    },
+    "u-boot-upstream.tar.gz": {
+      "bytes": 35055599,
+      "sha256": "6c99df5f9402d05b5a5cfc60f941f0a584d0d9355fce46261bef008487a0f6c4"
+    }
+  }
+}

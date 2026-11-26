@@ -1,0 +1,269 @@
+--- a/drivers/block/nbd.c
++++ b/drivers/block/nbd.c
+@@ -36,6 +36,7 @@
+ #include <linux/types.h>
+ #include <linux/debugfs.h>
+ #include <linux/blk-mq.h>
++#include <linux/platform_device.h>
+ 
+ #include <linux/uaccess.h>
+ #include <asm/types.h>
+@@ -50,6 +51,9 @@
+ static DEFINE_IDR(nbd_index_idr);
+ static DEFINE_MUTEX(nbd_index_mutex);
+ static int nbd_total_devices = 0;
++/* Android init recognizes boot partitions below a platform-device parent. */
++static bool boot_platform;
++static struct platform_device *nbd_boot_parent;
+ 
+ struct nbd_sock {
+ 	struct socket *sock;
+@@ -1744,7 +1748,10 @@
+ 	disk->fops = &nbd_fops;
+ 	disk->private_data = nbd;
+ 	sprintf(disk->disk_name, "nbd%d", index);
+-	add_disk(disk);
++	if (nbd_boot_parent)
++		device_add_disk(&nbd_boot_parent->dev, disk, NULL);
++	else
++		add_disk(disk);
+ 	nbd_total_devices++;
+ 	return index;
+ 
+@@ -2410,6 +2417,17 @@
+ 		unregister_blkdev(NBD_MAJOR, "nbd");
+ 		return -EINVAL;
+ 	}
++	if (boot_platform) {
++		nbd_boot_parent = platform_device_register_simple("opi-usb-boot",
++							       -1, NULL, 0);
++		if (IS_ERR(nbd_boot_parent)) {
++			int error = PTR_ERR(nbd_boot_parent);
++			nbd_boot_parent = NULL;
++			genl_unregister_family(&nbd_genl_family);
++			unregister_blkdev(NBD_MAJOR, "nbd");
++			return error;
++		}
++	}
+ 	nbd_dbg_init();
+ 
+ 	mutex_lock(&nbd_index_mutex);
+@@ -2448,6 +2466,8 @@
+ 	}
+ 
+ 	idr_destroy(&nbd_index_idr);
++	if (nbd_boot_parent)
++		platform_device_unregister(nbd_boot_parent);
+ 	genl_unregister_family(&nbd_genl_family);
+ 	unregister_blkdev(NBD_MAJOR, "nbd");
+ }
+@@ -2459,6 +2479,8 @@
+ MODULE_LICENSE("GPL");
+ 
+ module_param(nbds_max, int, 0444);
++module_param(boot_platform, bool, 0444);
++MODULE_PARM_DESC(boot_platform, "place NBD below opi-usb-boot for Android partition discovery");
+ MODULE_PARM_DESC(nbds_max, "number of network block devices to initialize (default: 16)");
+ module_param(max_part, int, 0444);
+ MODULE_PARM_DESC(max_part, "number of partitions per device (default: 16)");
+--- a/drivers/usb/sunxi_usb/udc/sunxi_udc_dma.h
++++ b/drivers/usb/sunxi_usb/udc/sunxi_udc_dma.h
+@@ -17,7 +17,10 @@
+ #define __SUNXI_UDC_DMA_H__
+ 
+ #ifdef SW_UDC_DMA
+-#define  is_udc_support_dma()		1
++/* Keep the buildable inner-DMA definitions, but use programmed I/O.
++ * Bulk Ethernet DMA completion loses requests on this H618 bring-up.
++ */
++#define  is_udc_support_dma()		0
+ #else
+ #define  is_udc_support_dma()		0
+ #endif
+--- a/include/asm-generic/vmlinux.lds.h
++++ b/include/asm-generic/vmlinux.lds.h
+@@ -539,6 +539,7 @@
+ 		*(.text.unlikely .text.unlikely.*)			\
+ 		*(.text.unknown .text.unknown.*)			\
+ 		*(TEXT_CFI_MAIN)					\
++		*(.text..L.cfi.jumptable .text..L.cfi.jumptable.*)	\
+ 		NOINSTR_TEXT						\
+ 		*(.text..refcount)					\
+ 		*(.text..ftrace)					\
+--- a/init/main.c
++++ b/init/main.c
+@@ -24,6 +24,8 @@
+ #include <linux/ctype.h>
+ #include <linux/delay.h>
+ #include <linux/ioport.h>
++#include <linux/io.h>
++#include <linux/reboot.h>
+ #include <linux/init.h>
+ #include <linux/initrd.h>
+ #include <linux/memblock.h>
+@@ -1200,6 +1202,125 @@
+ #define bootevent_initcall(fn, ts)
+ #endif
+ 
++/* USB-boot bring-up only: selected explicitly by the opi_diag boot argument. */
++bool opi_boot_diagnostics;
++
++static int __init opi_diag_setup(char *unused)
++{
++	opi_boot_diagnostics = true;
++	return 0;
++}
++early_param("opi_diag", opi_diag_setup);
++
++#ifdef CONFIG_ARM64
++/* Opt-in recovery for this RAM-only H616/H618 USB bring-up. Android's early
++ * fatal-init reboot must not depend on the vendor kernel / TF-A reset path.
++ */
++static bool opi_usb_recovery;
++static void __iomem *opi_recovery_wdt;
++
++static int __init opi_recovery_setup(char *unused)
++{
++	opi_usb_recovery = true;
++	return 0;
++}
++early_param("opi_recovery", opi_recovery_setup);
++
++static void opi_recovery_arm(void)
++{
++	/* The one-second full-system watchdog reset is already verified in FEL. */
++	writel(0x16aa0001, opi_recovery_wdt + 0x14);
++	writel(0x16aa0011, opi_recovery_wdt + 0x18);
++	writel(0x14af, opi_recovery_wdt + 0x10);
++	mb();
++}
++
++static int opi_recovery_restart(struct notifier_block *nb,
++				unsigned long action, void *reason)
++{
++	opi_recovery_arm();
++	pr_emerg("OPI USB recovery: watchdog reset, action=%lu reason=%s\n",
++		 action, reason ? (char *)reason : "(none)");
++	/* Avoid firmware reset/poweroff handlers that may clear the watchdog. */
++	for (;;)
++		cpu_relax();
++	return NOTIFY_DONE;
++}
++
++static int opi_recovery_panic(struct notifier_block *nb,
++			      unsigned long action, void *reason)
++{
++	opi_recovery_arm();
++	pr_emerg("OPI USB recovery: panic watchdog reset armed\n");
++	return NOTIFY_DONE;
++}
++
++static struct notifier_block opi_reboot_nb = {
++	.notifier_call = opi_recovery_restart, .priority = INT_MAX,
++};
++static struct notifier_block opi_restart_nb = {
++	.notifier_call = opi_recovery_restart, .priority = 255,
++};
++static struct notifier_block opi_panic_nb = {
++	.notifier_call = opi_recovery_panic, .priority = INT_MAX,
++};
++
++static int __init opi_recovery_init(void)
++{
++	int ret;
++
++	if (!opi_usb_recovery)
++		return 0;
++	opi_recovery_wdt = ioremap(0x030090a0, 0x20);
++	if (!opi_recovery_wdt)
++		return -ENOMEM;
++	ret = register_reboot_notifier(&opi_reboot_nb);
++	if (ret)
++		return ret;
++	ret = register_restart_handler(&opi_restart_nb);
++	if (ret) {
++		unregister_reboot_notifier(&opi_reboot_nb);
++		return ret;
++	}
++	ret = atomic_notifier_chain_register(&panic_notifier_list, &opi_panic_nb);
++	if (ret) {
++		unregister_restart_handler(&opi_restart_nb);
++		unregister_reboot_notifier(&opi_reboot_nb);
++		return ret;
++	}
++	pr_info("OPI USB recovery: reboot/panic watchdog handlers enabled\n");
++	return 0;
++}
++device_initcall(opi_recovery_init);
++#endif
++
++static void opi_diag_watchdog_kick(void)
++{
++#ifdef CONFIG_ARM64
++	static void __iomem *base;
++	static u32 last_mode = ~0U;
++	u32 mode;
++
++	/* Runtime module loads must not re-arm the boot progress watchdog. */
++	if (!opi_boot_diagnostics || system_state >= SYSTEM_RUNNING)
++		return;
++	if (!base)
++		base = ioremap(0x030090a0, 0x20);
++	if (base) {
++		mode = readl(base + 0x18);
++		if (mode != last_mode) {
++			pr_info("OPI diagnostic watchdog mode=0x%08x config=0x%08x\n",
++				mode, readl(base + 0x14));
++			last_mode = mode;
++		}
++		/* Keep this diagnostic watchdog independent of driver probing. */
++		writel(0x16aa0001, base + 0x14);
++		writel(0x16aa00b1, base + 0x18);
++		writel(0x14af, base + 0x10);
++	}
++#endif
++}
++
+ int __init_or_module do_one_initcall(initcall_t fn)
+ {
+ 	int count = preempt_count();
+@@ -1213,6 +1334,7 @@
+ 	if (initcall_blacklisted(fn))
+ 		return -EPERM;
+ 
++	opi_diag_watchdog_kick();
+ 	TIME_LOG_START();
+ 	do_trace_initcall_start(fn);
+ 	ret = fn();
+--- a/kernel/printk/printk.c
++++ b/kernel/printk/printk.c
+@@ -613,6 +613,12 @@
+ }
+ 
+ /* insert record into the buffer, discard old ones, update heads */
++#ifdef CONFIG_ARM64
++/* Preserve diagnostics across a watchdog reset, which discards CPU caches. */
++#include <asm/cacheflush.h>
++extern bool opi_boot_diagnostics;
++#endif
++
+ static int log_store(u32 caller_id, int facility, int level,
+ 		     enum log_flags flags, u64 ts_nsec,
+ 		     const char *dict, u16 dict_len,
+@@ -670,6 +676,16 @@
+ 	/* insert message */
+ 	log_next_idx += msg->len;
+ 	log_next_seq++;
++
++#ifdef CONFIG_ARM64
++	if (unlikely(opi_boot_diagnostics)) {
++		__flush_dcache_area(msg, msg->len);
++		__flush_dcache_area(&log_next_idx, sizeof(log_next_idx));
++		__flush_dcache_area(&log_first_idx, sizeof(log_first_idx));
++		__flush_dcache_area(&log_buf, sizeof(log_buf));
++		__flush_dcache_area(&log_buf_len, sizeof(log_buf_len));
++	}
++#endif
+ 
+ 	return msg->text_len;
+ }

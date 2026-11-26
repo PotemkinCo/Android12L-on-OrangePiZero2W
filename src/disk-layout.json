@@ -1,0 +1,92 @@
+[
+  {
+    "name": "super",
+    "offset": 1048576,
+    "bytes": 3221225472
+  },
+  {
+    "name": "metadata",
+    "offset": 3222274048,
+    "bytes": 16777216
+  },
+  {
+    "name": "userdata",
+    "offset": 3239051264,
+    "bytes": 2147483648
+  },
+  {
+    "name": "media_data",
+    "offset": 5386534912,
+    "bytes": 16777216
+  },
+  {
+    "name": "boot_a",
+    "offset": 5403312128,
+    "bytes": 67108864
+  },
+  {
+    "name": "boot_b",
+    "offset": 5470420992,
+    "bytes": 67108864
+  },
+  {
+    "name": "vendor_boot_a",
+    "offset": 5537529856,
+    "bytes": 33554432
+  },
+  {
+    "name": "vendor_boot_b",
+    "offset": 5571084288,
+    "bytes": 33554432
+  },
+  {
+    "name": "misc",
+    "offset": 5604638720,
+    "bytes": 16777216
+  },
+  {
+    "name": "vbmeta_a",
+    "offset": 5621415936,
+    "bytes": 131072
+  },
+  {
+    "name": "vbmeta_b",
+    "offset": 5622464512,
+    "bytes": 131072
+  },
+  {
+    "name": "vbmeta_system_a",
+    "offset": 5623513088,
+    "bytes": 65536
+  },
+  {
+    "name": "vbmeta_system_b",
+    "offset": 5624561664,
+    "bytes": 65536
+  },
+  {
+    "name": "vbmeta_vendor_a",
+    "offset": 5625610240,
+    "bytes": 65536
+  },
+  {
+    "name": "vbmeta_vendor_b",
+    "offset": 5626658816,
+    "bytes": 65536
+  },
+  {
+    "name": "frp",
+    "offset": 5627707392,
+    "bytes": 1048576
+  },
+  {
+    "name": "dtbo_a",
+    "offset": 5628755968,
+    "bytes": 2097152
+  },
+  {
+    "name": "dtbo_b",
+    "offset": 5630853120,
+    "bytes": 2097152
+  }
+]

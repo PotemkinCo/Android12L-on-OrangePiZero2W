@@ -1,0 +1,89 @@
+#!/opi/sh
+export PATH=/opi:/system/bin:/vendor/bin
+/opi/mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+/opi/mkdir -p /proc /sys /dev/pts /run /tmp /mnt
+/opi/mount -t proc proc /proc
+/opi/mount -t sysfs sysfs /sys
+exec >/dev/kmsg 2>&1
+set -e
+opi_stage=watchdog
+trap 'opi_status=$?; [ "$opi_status" = 0 ] || printf "OPI_BOOTSTRAP_EXIT status=%s step=%s\n" "$opi_status" "$opi_stage" >/dev/kmsg' EXIT
+opi_log() { printf '%s\n' "$*" >/dev/kmsg; }
+opi_log ANDROID_USB_BOOTSTRAP_BEGIN
+/opi/watchdog --arm
+/opi/watchdog --guard 300 &
+opi_stage=compressed_swap
+# Compressed RAM swap avoids recursive swap I/O through the USB root disk.
+printf '536870912\n' >/sys/block/zram0/disksize
+printf '268435456\n' >/sys/block/zram0/mem_limit
+/opi/mkswap /dev/zram0
+/opi/swapon /dev/zram0
+printf '100\n' >/proc/sys/vm/swappiness
+cat /proc/swaps >/dev/kmsg
+opi_wait=0
+while [ ! -d /sys/class/net/usb0 ]; do
+    opi_wait=$((opi_wait + 1))
+    [ "$opi_wait" -lt 25 ]
+    sleep 1
+done
+opi_stage=configure_usb
+ip link set usb0 up
+ip addr add 192.168.246.2/30 dev usb0
+# Android12 netd flushes every routing rule except priority0. Keep only the
+# directly connected laptop endpoint reachable before Android/VPN rules apply.
+ip route add 192.168.246.0/30 dev usb0 src 192.168.246.2 table 246
+ip rule add pref 0 from 192.168.246.2/32 to 192.168.246.1/32 table 246
+case "$(cat /proc/cmdline)" in
+    *opi_live_kmsg=1*) /opi/kmsg-forwarder >/run/opi-kmsg-forwarder.log 2>&1 & ;;
+esac
+cat > /run/opi-udhcpd.conf <<EOF
+start 192.168.246.1
+end 192.168.246.1
+interface usb0
+option subnet 255.255.255.252
+option lease 86400
+lease_file /run/opi-udhcpd.leases
+pidfile /run/opi-udhcpd.pid
+EOF
+udhcpd -f /run/opi-udhcpd.conf >/run/opi-udhcpd.log 2>&1 &
+opi_dhcp_pid=$!
+printf '%s\n' -1000 >"/proc/$opi_dhcp_pid/oom_score_adj"
+opi_stage=attach_disk
+OPI_NBD_LOG_KMSG=1 /opi/nbd-reverse-client 192.168.246.2 5555 usb0 >/run/opi-nbd.log 2>&1 &
+opi_disk_pid=$!
+opi_wait=0
+opi_log ANDROID_USB_WAITING_FOR_HOST_DISK
+while [ "$(cat /sys/block/nbd0/size)" = 0 ]; do
+    [ -d "/proc/$opi_disk_pid" ]
+    opi_wait=$((opi_wait + 1))
+    [ "$opi_wait" -lt 120 ]
+    sleep 1
+done
+# Older NBD ioctl paths mark the disk invalidated but need a fresh open to
+# trigger partition discovery after NBD_DO_IT has actually started receiving.
+opi_stage=probe_partitions
+dd if=/dev/nbd0 of=/dev/null bs=512 count=1
+opi_wait=0
+while [ ! -e /sys/block/nbd0/nbd0p1 ]; do
+    opi_wait=$((opi_wait + 1))
+    [ "$opi_wait" -lt 15 ]
+    sleep 1
+done
+cat /run/opi-nbd.log >/dev/kmsg
+case "$(cat /proc/cmdline)" in
+    *opi_live_kmsg=1*) sleep 1 ;;
+esac
+# Android first-stage init treats pre-existing proc/sysfs mounts as fatal.
+# Detach only the bootstrap's actual mounts (it did not mount devpts).
+# NBD, watchdog and kmsg helpers keep their
+# already-open descriptors/mappings. Keep proc until the last external applet.
+opi_log ANDROID_USB_DETACHING_BOOTSTRAP_MOUNTS
+opi_stage=detach_dev
+/opi/umount -l /dev
+opi_stage=detach_sys
+/opi/umount -l /sys
+opi_stage=detach_proc
+/opi/umount -l /proc
+opi_stage=exec_android
+opi_log ANDROID_USB_EXECUTING_FIRST_STAGE_INIT
+exec /init

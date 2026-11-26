@@ -1,0 +1,121 @@
+####################################
+# from generate-common-build-props
+# These properties identify this partition image.
+####################################
+ro.product.vendor.brand=Allwinner
+ro.product.vendor.device=apollo-p2
+ro.product.vendor.manufacturer=Allwinner
+ro.product.vendor.model=orangepizero2w
+ro.product.vendor.name=omni_apollo_p2
+ro.vendor.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi
+ro.vendor.product.cpu.abilist32=armeabi-v7a,armeabi
+ro.vendor.product.cpu.abilist64=arm64-v8a
+ro.vendor.build.date=Thu Dec  5 00:29:42 EST 2024
+ro.vendor.build.date.utc=1733376582
+ro.vendor.build.fingerprint=Allwinner/omni_apollo_p2/apollo-p2:12/SQ3A.220605.009.A1/yajat12050029:userdebug/test-keys
+ro.vendor.build.id=SQ3A.220605.009.A1
+ro.vendor.build.tags=test-keys
+ro.vendor.build.type=userdebug
+ro.vendor.build.version.incremental=eng.yajat.20241205.003018
+ro.vendor.build.version.release=12
+ro.vendor.build.version.release_or_codename=12
+ro.vendor.build.version.sdk=32
+####################################
+# from out/target/product/apollo-p2/obj/ETC/android_info_prop_intermediates/android_info.prop
+####################################
+####################################
+# from variable ADDITIONAL_VENDOR_PROPERTIES
+####################################
+ro.vndk.version=32
+ro.bionic.arch=arm64
+ro.bionic.cpu_variant=generic
+ro.bionic.2nd_arch=arm
+ro.bionic.2nd_cpu_variant=generic
+persist.sys.dalvik.vm.lib.2=libart.so
+dalvik.vm.isa.arm64.variant=generic
+dalvik.vm.isa.arm64.features=default
+dalvik.vm.isa.arm.variant=generic
+dalvik.vm.isa.arm.features=default
+ro.boot.dynamic_partitions=true
+ro.product.first_api_level=31
+ro.product.debugfs_restrictions.enabled=true
+ro.vendor.build.security_patch=
+ro.product.board=exdroid
+ro.board.platform=apollo
+ro.hwui.use_vulkan=
+ro.build.ab_update=true
+####################################
+# from variable PRODUCT_VENDOR_PROPERTIES
+####################################
+ro.virtual_ab.enabled=true
+ro.config.ringtone=Ring_Synth_04.ogg
+# Removed by post_process_props.py because overridden by ro.config.notification_sound?=OnTheHunt.ogg
+#ro.config.notification_sound?=pixiedust.ogg
+# Removed by post_process_props.py because overridden by ro.zygote=zygote64_32
+#ro.zygote?=zygote32
+tombstoned.max_tombstone_count=50
+ro.logd.size.stats=64K
+log.tag.stats_log=I
+ro.carrier=unknown
+ro.config.notification_sound=OnTheHunt.ogg
+ro.config.alarm_alert=Alarm_Classic.ogg
+####################################
+# from variable PRODUCT_DEFAULT_PROPERTY_OVERRIDES
+####################################
+ro.oem_unlock_supported=1
+####################################
+# from variable PRODUCT_PROPERTY_OVERRIDES
+####################################
+persist.sys.strictmode.disable=true
+ro.vendor.spk_dul.used=false
+ro.vendor.audio.eq=false
+ro.sf.lcd_density=120
+vendor.camera.uvc.fourcc=0
+ro.hdmi.device_type=4
+vendor.audio.output.active=AUDIO_CODEC,AUDIO_HDMI
+vendor.audio.input.active=AUDIO_AC107
+external_storage.casefold.enabled=true
+external_storage.projid.enabled=true
+ro.crypto.volume.contents_mode=aes-256-xts
+ro.crypto.volume.filenames_mode=aes-256-cts
+ro.incremental.enable=module:/vendor/lib/modules/incrementalfs.ko
+ro.config.per_app_memcg=false
+persist.sys.zram_enabled=1
+ro.zram.first_wb_delay_mins=180
+ro.zram.mark_idle_delay_mins=60
+ro.zram.periodic_wb_delay_hours=24
+debug.sf.latch_unsignaled=1
+drm.service.enabled=true
+ro.boot.dynamic_partitions_retrofit=true
+ro.rebootescrow.device=/dev/block/pmem0
+ro.frp.pst=/dev/block/by-name/frp
+ro.control_privapp_permissions=enforce
+init.userspace_reboot.is_supported=1
+ro.soc.manufacturer=Allwinner
+ro.soc.model=H618
+qemu.hw.mainkeys=0
+ro.zygote=zygote64_32
+persist.vendor.p_bootcomplete=true
+persist.vendor.p_debug=false
+persist.vendor.p_benchmark=true
+persist.vendor.p_music=true
+debug.sf.disable_backpressure=1
+ro.logd.size=524288
+ro.logd.size.main=4194304
+ro.logd.size.system=1048576
+ro.logd.size.crash=4194304
+vendor.rild.libargs=-d/dev/ttyUSB2
+vendor.rild.libpath=libsoftwinner-ril-12.0.so
+ro.radio.noril=true
+ro.radio.noawril=false
+ro.vendor.sw.embeded.telephony=false
+dalvik.vm.heapstartsize=5m
+dalvik.vm.heapgrowthlimit=192m
+dalvik.vm.heapsize=256m
+dalvik.vm.heaptargetutilization=0.75
+dalvik.vm.heapminfree=512k
+dalvik.vm.heapmaxfree=8m
+# Auto-added by post_process_props.py
+persist.sys.usb.config=none
+# end of file
+ro.config.low_ram=true
