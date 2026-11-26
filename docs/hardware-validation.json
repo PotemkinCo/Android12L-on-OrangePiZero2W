@@ -1,0 +1,101 @@
+{
+  "test_date_utc": "2026-11-26T17:23:47.567439+00:00",
+  "runtime_release": "v0.1.0",
+  "archive_sha256": "ebe0745d84086e083269fb5eb1d4bf2f57f12cfad8cbfb3a0841bb372df2a41f",
+  "initial_disk_sha256": "7db1e965cf509afaecc6328f0457504a6fc1c4194f5f3778c7947c914f83e05a",
+  "board": "Orange Pi Zero 2W 1GB",
+  "host_platform": "Linux x86_64",
+  "android_release": "12L / 12.1",
+  "android_sdk": 32,
+  "abi": "arm64-v8a",
+  "kernel": "5.4.125 #5",
+  "fresh_userdata_boot_completed": true,
+  "fresh_first_boot_seconds": 339.6,
+  "display_screenshot_pixels": [
+    1280,
+    720
+  ],
+  "initial_accounts": 0,
+  "additional_test_app_absent": true,
+  "initial_saved_wifi": false,
+  "adb_working": true,
+  "root_control_working": true,
+  "usb_only_debug_firewall_verified": true,
+  "compressed_swap_kib": 524284,
+  "mem_available_after_first_boot_kib": 405216,
+  "settings_launch": {
+    "state": "WARM",
+    "total_ms": 2734
+  },
+  "published_wifi_helper": {
+    "exit_code": 0,
+    "connected_to_authorized_network": true,
+    "android_network_validated": true,
+    "usb_storage_preserved": true,
+    "credentials_not_in_host_arguments": true
+  },
+  "network_checks": {
+    "dns_and_ping": [
+      "github.com",
+      "www.google.com",
+      "cloudflare.com"
+    ],
+    "internet_ipv4_ping": "1.1.1.1",
+    "http_tcp_status": 301
+  },
+  "first_clean_shutdown": {
+    "status": "stopped; Boot ROM verified and disk image unlocked",
+    "normal_android_shutdown": true,
+    "live_boot_rom_verified": true,
+    "userdata_checkpoint": {
+      "status": "latest F2FS checkpoint clean; both CRCs and footers verified",
+      "block_bytes": 4096,
+      "packs": [
+        {
+          "pack": 0,
+          "version": 1681371861,
+          "flags": "0xc5",
+          "crc_verified": true,
+          "matching_footer": true,
+          "clean_unmount": true
+        },
+        {
+          "pack": 1,
+          "version": 1681371862,
+          "flags": "0xc5",
+          "crc_verified": true,
+          "matching_footer": true,
+          "clean_unmount": true
+        }
+      ],
+      "latest_pack": 1
+    }
+  },
+  "reboot_persistence": {
+    "boot_completed": true,
+    "saved_file_sha256": "ce73712c947cbb8a229f92ac14295a96b99f291559bcef434296de2896469aa2",
+    "saved_file_matches": true,
+    "wifi_reconnected_automatically": true,
+    "internet_dns_and_ping": true,
+    "watchdog_remains_disabled": true
+  },
+  "storage_benchmark": {
+    "sequential_write_MiB_s": 14.85,
+    "sequential_read_MiB_s": 14.45,
+    "random_4K_read_iops": 2381.3,
+    "random_4K_read_ms": 0.42,
+    "random_4K_fsync_write_iops": 714.4,
+    "random_4K_fsync_write_ms": 1.4,
+    "direct_io": true,
+    "test_file_MiB": 16,
+    "scope": "Single16MiB O_DIRECT test on Android F2FS; board page cache bypassed, host SSD cache still applies. Results depend on host/cable; not long-duration or macOS performance."
+  },
+  "public_archive_modified": false,
+  "private_wifi_configured_only_on_disposable_test_copy": true,
+  "macos_hardware_tested": false,
+  "new_generic_factory_setup_wrapper_hardware_tested": false,
+  "initialized_boot_seconds": 275.3,
+  "storage_benchmark_source_sha256": "5b29e6b0246a626667efd803cc94b06693b1ae898f20f3d889d80abc030b18b7",
+  "hardware_validation_completed_utc": "2026-11-26T17:26:15.460070+00:00",
+  "published_image_hardware_boot_status": "PASS: exact pristine v0.1.0 image first boot, clean shutdown, initialized reboot and persistence"
+}

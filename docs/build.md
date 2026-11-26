@@ -93,6 +93,26 @@ The runtime release contains its matching boot manifest, bootloader, marker,
 unchanged inputs into your development checkout when rebuilding there; changed
 payload files must use the newly generated manifest.
 
+## Reproduce the Android filesystem measurement
+
+This optional, bounded test creates a new 16 MiB file in a dedicated temporary
+folder. It uses O_DIRECT to bypass the board page cache and refuses to overwrite
+an existing test file. Host SSD caching still applies; this is not a cold-storage
+or long-duration measurement. Run it after Android is ready:
+
+```sh
+mkdir -p build
+aarch64-linux-gnu-gcc -static -O2 -Wall -Wextra tools/storage-benchmark.c -o build/storage-benchmark
+adb -s 192.168.246.2:5555 push build/storage-benchmark /data/local/tmp/opi-storage-benchmark-bin
+adb -s 192.168.246.2:5555 shell chmod 755 /data/local/tmp/opi-storage-benchmark-bin
+adb -s 192.168.246.2:5555 shell 'mkdir -p /data/local/tmp/opi-storage-benchmark; timeout 70 /data/local/tmp/opi-storage-benchmark-bin /data/local/tmp/opi-storage-benchmark/run-$(date +%s).bin'
+```
+
+Results are JSON. Each run includes 16 MiB sequential writes/reads, 1,024 random
+4 KiB reads, and 256 random 4 KiB writes with fsync. The program has a 60-second
+alarm. These files are test data inside the disposable Android disk; do not copy
+or publish the live disk to share a benchmark. [Measured results](validation.md).
+
 ## Android userspace and bootloader provenance
 
 The stock system came from [OmniROM12.1v3 ARM64 tablet for Zero2W](https://github.com/YAJATapps/android_device_allwinner_apollo-p2/releases/download/v3/omni-12.1_20241209_arm64_zero2w.zip),

@@ -12,7 +12,8 @@ launcher reports boot completion. Disconnect this board before normal shutdown
 to avoid an automatic reconnect attempt through the host's default network while
 USB is absent. Never kill a shared ADB server containing unrelated devices.
 
-A PNG screenshot works without HDMI. To operate the UI remotely, scrcpy is an
+A PNG screenshot works without HDMI. If it is black, first run
+`adb -s 192.168.246.2:5555 shell input keyevent 224` to wake the display. To operate the UI remotely, scrcpy is an
 optional upstream tool (`brew install scrcpy` or your Linux package manager),
 then `scrcpy -s 192.168.246.2:5555`. Interactive streaming has not yet been tested
 on this image. ADB `shell input tap X Y` and `shell am start -a

@@ -6,8 +6,9 @@ using its **USB0** cable. The computer uploads the boot files, then serves an
 running while Android runs.** No SD card, USB drive, keyboard or serial adapter
 is needed for the supported factory firmware setup.
 
-**Prerelease:** the boot stack is hardware verified; this fresh, empty-userdata
-public image has passed offline checks but still needs its own board boot test.
+**Hardware tested:** the exact public image passed fresh boot, Wi-Fi/ADB, clean
+shutdown and reboot with settings/file persistence on a Zero 2W 1 GB with a Linux host.
+This is still an early prerelease; see [tested scope](docs/validation.md).
 
 ## Download and start
 
@@ -56,6 +57,7 @@ public image has passed offline checks but still needs its own board boot test.
 ```sh
 adb connect 192.168.246.2:5555
 adb -s 192.168.246.2:5555 shell getprop sys.boot_completed  # must print 1
+adb -s 192.168.246.2:5555 shell input keyevent 224        # wake the screen
 adb -s 192.168.246.2:5555 exec-out screencap -p > screen.png
 python3 tools/connect-wifi.py  # prompts privately; optional, after Android boots
 ```
@@ -85,6 +87,8 @@ Android apps/settings persist in `data/android-arm64.img` on the computer.
 **Development image:** userdebug, permissive SELinux, unlocked/AVB-disabled;
 root control and unauthenticated ADB are limited to the USB link. This is not a
 hardened daily-use image. Bluetooth is disabled in this profile.
+
+[Actual Android screenshot](docs/android-home.png) · [Hardware results](docs/hardware-validation.json).
 
 See [tested scope and limitations](docs/validation.md). Other board/RAM variants
 and actual macOS execution are not verified. No Wi-Fi boot or standalone boot:
