@@ -75,6 +75,56 @@ This flushes Android, verifies actual USB recovery, and only then releases its
 identified disk server. Do not kill the server or copy the live disk image.
 Android apps/settings persist in `data/android-arm64.img` on the computer.
 
+## Unattended reboot (no unplugging)
+
+After the one-time board setup, run this **from the same extracted folder that
+started Android**. Configure USB Ethernet DHCP to reconnect automatically first.
+
+```sh
+adb disconnect 192.168.246.2:5555  # if using a separate ADB server, supply its -P port
+python3 tools/stop-android-usb.py && python3 tools/start-android-usb.py
+```
+
+The stop tool requests normal Android shutdown, keeps the disk served until
+actual USB Boot ROM recovery is verified, releases only its owned server, and
+checks clean filesystem checkpoints. The launcher then uploads the boot files
+and starts Android from the same disk, preserving apps/settings. **No cable
+reconnect or button press is needed.** This complete cycle passed on Linux.
+The `&&` prevents starting again if shutdown or filesystem checks fail.
+
+Kernel reboot/panic/emergency watchdog recovery was also hardware tested. It
+returns the board to USB recovery, **not automatically to Android**; the host
+launcher must run again. After a failure,
+`python3 tools/stop-android-usb.py --already-in-fel` can verify recovery and clean
+up its owned server, but refuses
+an unclean filesystem. Do not ignore that error or kill a possibly mounted disk
+server. Recovery from every hardware/power/USB failure is not guaranteed.
+
+## Measured performance
+
+Measured on **Zero 2W, 1 GB**, with a **Linux x86_64 host and SSD**, using the
+exact v0.1.0 public image. These are measurements, not minimum guarantees.
+
+| Metric | Result |
+| --- | --- |
+| First boot, empty user data | **5m40s** (339.6 s) |
+| Subsequent boot | **4m35s** (275.3 s) |
+| Android-visible RAM | **979 MiB** (1,002,216 KiB; hardware has 1 GB) |
+| RAM available after fresh boot | **396 MiB** (405,216 KiB, `MemAvailable`) |
+| RAM unavailable estimate | **583 MiB** (`MemTotal − MemAvailable`; includes Android/kernel) |
+| Compressed swap | **512 MiB logical ZRAM**, **256 MiB compressed-memory limit** |
+| Settings activity launch, warm | **2.734 s** |
+| Sequential filesystem write / read | **14.85 / 14.45 MiB/s** |
+| Random 4 KiB read | **2,381 IOPS**, **0.420 ms** |
+| Random 4 KiB write + fsync | **714 IOPS**, **1.400 ms** |
+
+Boot timing includes FEL uploads/readback and Android startup. RAM is a snapshot;
+`MemTotal − MemAvailable` is not summed app RSS. Storage used a single **16 MiB
+O_DIRECT** test on Android F2FS: board page cache was bypassed, **host SSD caching
+still applies**. Host/cable, workload and background activity affect results;
+network throughput, long-duration performance and macOS performance are unmeasured.
+[Raw results](docs/hardware-validation.json) · [Benchmark reproduction](docs/build.md#reproduce-the-android-filesystem-measurement).
+
 ## What is included
 
 - Android 12L/API 32 ARM64 tablet image, based on [OmniROM 12.1 v3](https://blogs.yajatkumar.com/2024/12/omnirom-121-v3-tablet-arm64-for-orange.html).
